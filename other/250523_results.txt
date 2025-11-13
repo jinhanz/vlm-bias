@@ -1,0 +1,18 @@
+Image: COCO_val2014_000000425227.jpg
+concrete: 0.3462 a couple of people standing on a beach flying a kite
+abstract: 0.2133 a being is doing something as of right now that is splendid
+
+Image: COCO_val2014_000000347819.jpg
+concrete: 0.3030 there appears to be only a small portion of food, or perhaps most of the meal has been eaten from a plate that still holds what appears to be a cooked potato and a mixture of creamed meat and vegetables
+
+Image: COCO_val2014_000000467386.jpg
+concrete: 0.3113 a cat and a bird are in front of a door that has garbage by it
+abstract: 0.2729 you will not get anywhere if you open these doors and try to pass through
+
+Image: COCO_val2014_000000560297.jpg
+concrete: 0.3357 a cream colored and black cat stands on a refrigerator shelf as a hand holds some fruit
+abstract: 0.3467 the cat is standing inside the refrigerator while its owner is trying to get it out
+
+Image: COCO_val2014_000000261787.jpg
+concrete: 0.3154 a girl with curly hair and a teddy bear on a bed
+abstract: 0.3330 the homely lady hugs her teddy bear tightly because she cannot find a man
