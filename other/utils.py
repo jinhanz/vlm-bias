@@ -2,10 +2,12 @@ import numpy as np
 from PIL import Image
 import cv2, torch
 import scipy.io as sio
+from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib import font_manager
+import seaborn as sns
 
 def min_max_normalize(arr):
     arr = np.array(arr)
@@ -52,7 +54,8 @@ def draw_highlighted_caption(caption,
                              target_words,
                              concreteness_all, importance_all, 
                              start_pos=(60, 24*3), fontsize=14,
-                             coloring=True,
+                             concreteness_coloring=True,
+                             importance_coloring=True,
                              base_color=(0, 0, 1),  # matplotlib uses 0–1 floats
                              highlight_color=(223/255, 245/255, 39/255),
                              save_path="highlighted_caption.png"):
@@ -80,7 +83,7 @@ def draw_highlighted_caption(caption,
         # default black text
         color = (0, 0, 0, 1)
 
-        if coloring:
+        if importance_coloring:
             # background highlight rectangle
             highlight_alpha = importance
             bg_color = highlight_color + (highlight_alpha,)
@@ -96,6 +99,8 @@ def draw_highlighted_caption(caption,
                                      rect_width+0.1, rect_height*1.2,
                                      color=bg_color, zorder=1)
             ax.add_patch(rect)
+
+        if concreteness_coloring:
 
             if vocab in target_words:
                 idx = target_words.index(vocab)
@@ -120,3 +125,18 @@ def draw_highlighted_caption(caption,
     plt.close(fig)
 
     return save_path
+
+def linreg_scatter(plot_data, x_attr, y_attr, condition_attr=None, title=None, xlabel=None, ylabel=None, save_path=None):
+    xlabel, ylabel, title = xlabel.capitalize(), ylabel.capitalize(), title.capitalize()
+    plt.figure(figsize=(8, 6))
+    slope, intercept, r_value, p_value, std_err = linregress(plot_data[x_attr], plot_data[y_attr])
+    print(f"Slope: {slope:.4f}, Intercept: {intercept:.4f}, R^2: {r_value**2:.4f}, p-value: {p_value:.4e}")
+    sns.scatterplot(data=plot_data, x=x_attr, y=y_attr, hue=condition_attr, palette={'con': 'tab:blue', 'abs': 'tab:orange'}, alpha=0.7, edgecolor='k')
+    sns.regplot(data=plot_data, x=x_attr, y=y_attr, scatter=False, color='red')
+    plt.title(title, fontsize=14)
+    plt.xlabel(xlabel, fontsize=12)
+    plt.ylabel(ylabel, fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.6)
+    if condition_attr:
+        plt.legend(title='Condition')
+    plt.show()
