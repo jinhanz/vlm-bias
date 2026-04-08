@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(purrr)
+
+library(ggplot2)
+library(ggpubr)
+library(emmeans)
+library(sjPlot)
+```
+
+## Rating
+
+
+```{r}
+# Define the directory containing the files
+file_path <- "./data/rating_diff_long_format.csv"
+
+# Read the CSV file
+data <- read.csv(file_path)
+
+# Ensure columns are appropriately formatted
+data <- data %>% 
+  mutate(
+    condition = recode(
+      condition,
+      "abs" = "Abstract",
+      "con" = "Concrete"
+    ),
+    image = as.factor(image),
+    subject = as.factor(subject),
+  )
+
+model <- lmer(rating_diff ~ condition + (1 | image) + (1 | subject), data = data)
+print(summary(model))
+
+emm_options(lmerTest.limit = 10000)
+
+emm <- emmeans(model, ~ condition)
+emm_df <- as.data.frame(emm)
+
+colors <- c("#F8766D", "#00BFC4")
+
+ggplot(emm_df, aes(x = condition, y = emmean, color = condition)) +
+  geom_point(size = 3) +
+  geom_errorbar(
+    aes(ymin = lower.CL, ymax = upper.CL),
+    width = 0.15,
+    linewidth = 0.8,
+  ) +
+  scale_color_manual(values = colors) +
+  labs(
+    x = "Condition",
+    y = "Estimated \nAbsolute Rating Z-score Difference\n(Human - CLIP)"
+  ) +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 16),  # x-axis label font size
+    axis.title.y = element_text(size = 16)   # y-axis label font size
+  ) 
+```

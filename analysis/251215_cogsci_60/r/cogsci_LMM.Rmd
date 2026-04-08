@@ -1,0 +1,202 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(purrr)
+
+library(ggplot2)
+library(ggpubr)
+library(emmeans)
+library(sjPlot)
+```
+
+## Concreteness Bias in CLIP and Human
+
+```{r}
+# Define the directory containing the files
+file_path <- "./data/concreteness_importance.csv"
+
+# Read the CSV file
+data <- read.csv(file_path)
+
+# Ensure columns are appropriately formatted
+data <- data %>% 
+  mutate(
+    agent = recode(
+      model,
+      "human" = "Human",
+      "clip" = "CLIP",
+    ),
+    image_id = as.factor(image_id),
+  )
+
+# data$agent <- relevel(data$agent, ref="Human")
+
+model <- lmer(importance ~ concreteness * agent +  (1 | image_id), data = data)
+print(summary(model))
+
+emm <- emmeans(model, ~ agent)
+emm_df <- as.data.frame(emm)
+
+colors <- c("#00BFC4", "#F8766D")
+
+ggplot(emm_df, aes(x = agent, y = emmean, color = agent)) +
+  geom_point(size = 3) +
+  geom_errorbar(
+    aes(ymin = lower.CL, ymax = upper.CL),
+    width = 0.15,
+    linewidth = 0.8
+  ) +
+  scale_color_manual(values = colors) +
+  labs(
+    x = "Agent",
+    y = "Estimated Word Importance"
+  ) +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none")
+
+
+sjPlot::set_theme(base = theme_classic())
+p <- plot_model(model, type = "pred", terms = c("concreteness", "agent"), line.size = 1, colors = c("#00BFC4", "#F8766D"))
+p + ylab("Word Importance") + xlab("Concreteness") + coord_fixed(ratio = 4)
+```
+
+## CLIP-Human Attention Alignment
+
+### Caption
+
+```{r}
+# Define the directory containing the files
+file_path <- "./data/alignment_word_importance_pcc.csv"
+
+# Read the CSV file
+data <- read.csv(file_path)
+
+# Ensure columns are appropriately formatted
+data <- data %>% 
+  mutate(
+    condition = recode(
+      condition,
+      "abs" = "Abstract",
+      "con" = "Concrete"
+    ),
+    image_id = as.factor(image_id),
+  )
+
+
+
+model <- lmer(word_importance_pcc ~ condition +  (1 | image_id), data = data)
+print(summary(model))
+
+emm <- emmeans(model, ~ condition)
+emm_df <- as.data.frame(emm)
+
+colors <- c("#F8766D", "#00BFC4")
+
+ggplot(emm_df, aes(x = condition, y = emmean, color = condition)) +
+  geom_point(size = 3) +
+  geom_errorbar(
+    aes(ymin = lower.CL, ymax = upper.CL),
+    width = 0.15,
+    linewidth = 0.8
+  ) +
+  scale_color_manual(values = colors) +
+  labs(
+    x = "Condition",
+    y = "Estimated \nCaption Attention Alignment\n(PCC)"
+  ) +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 16),  # x-axis label font size
+    axis.title.y = element_text(size = 16)   # y-axis label font size
+  ) +
+  ylim(0.1, 0.5)
+```
+
+### Image
+
+```{r}
+# Define the directory containing the files
+file_path <- "./data/alignment_map_pcc.csv"
+
+# Read the CSV file
+data <- read.csv(file_path)
+
+# Ensure columns are appropriately formatted
+data <- data %>% 
+  mutate(
+    condition = recode(
+      condition,
+      "abs" = "Abstract",
+      "con" = "Concrete"
+    ),
+    image_id = as.factor(image_id),
+  )
+
+model <- lmer(map_pcc ~ condition +  (1 | image_id), data = data)
+print(summary(model))
+
+emm <- emmeans(model, ~ condition)
+emm_df <- as.data.frame(emm)
+
+colors <- c("#F8766D", "#00BFC4")
+
+ggplot(emm_df, aes(x = condition, y = emmean, color = condition)) +
+  geom_point(size = 3) +
+  geom_errorbar(
+    aes(ymin = lower.CL, ymax = upper.CL),
+    width = 0.15,
+    linewidth = 0.8
+  ) +
+  scale_color_manual(values = colors) +
+  labs(
+    x = "Condition",
+    y = "Estimated \nImage Attention Alignment\n(PCC)"
+  ) +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 16),  # x-axis label font size
+    axis.title.y = element_text(size = 16)   # y-axis label font size
+  ) +
+  ylim(0.1, 0.5)
+```
+
+## Individual Difference in Visual Attention Pattern
+
+```{r}
+# Define the directory containing the files
+file_path <- "./data/alignment_image_groups_map_pcc.csv"
+
+# Read the CSV file
+data <- read.csv(file_path)
+
+# Ensure columns are appropriately formatted
+data <- data %>% 
+  mutate(
+    condition = recode(
+      condition,
+      "abs" = "Abstract",
+      "con" = "Concrete"
+    ),
+    group = recode(
+      group,
+      "image_grp1" = "Group E",
+      "image_grp2" = "Group F"
+    ),,
+    image_id = as.factor(image_id),
+  )
+
+model <- lmer(map_pcc ~ condition * group +  (1 | image_id), data = data)
+print(summary(model))
+
+p <- plot_model(model, type = "pred", terms = c("condition", "group"), line.size = 1, colors = c("#F8766D", "#00BFC4"))
+
+p + ylab("Estimated \nImage Attention Alignment\n(PCC)")
+```
