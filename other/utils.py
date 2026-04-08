@@ -127,15 +127,15 @@ def draw_highlighted_caption(caption,
     return save_path
 
 def linreg_scatter(plot_data, x_attr, y_attr, condition_attr=None, title=None, xlabel=None, ylabel=None, save_path=None):
-    xlabel, ylabel, title = xlabel.capitalize(), ylabel.capitalize(), title.capitalize()
+    xlabel, ylabel = xlabel.capitalize(), ylabel.capitalize()
     plt.figure(figsize=(8, 6))
     slope, intercept, r_value, p_value, std_err = linregress(plot_data[x_attr], plot_data[y_attr])
     print(f"Slope: {slope:.4f}, Intercept: {intercept:.4f}, R^2: {r_value**2:.4f}, p-value: {p_value:.4e}")
     sns.scatterplot(data=plot_data, x=x_attr, y=y_attr, hue=condition_attr, palette={'con': 'tab:blue', 'abs': 'tab:orange'}, alpha=0.7, edgecolor='k')
     sns.regplot(data=plot_data, x=x_attr, y=y_attr, scatter=False, color='red')
-    plt.title(title, fontsize=14)
-    plt.xlabel(xlabel, fontsize=12)
-    plt.ylabel(ylabel, fontsize=12)
+    plt.title(title, fontsize=32)
+    plt.xlabel(xlabel, fontsize=24)
+    plt.ylabel(ylabel, fontsize=24)
     plt.grid(True, linestyle='--', alpha=0.6)
     if condition_attr:
         plt.legend(title='Condition')
